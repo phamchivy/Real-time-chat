@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import InputBox from "./InputBox";
 import MessageList from "./MessageList";
-import axios from "axios";
+//import axios from "axios";
 
 const Chat = ({ userId, partnerId }) => {
     const socket = useSocket();
@@ -22,20 +22,19 @@ const Chat = ({ userId, partnerId }) => {
         if (!socket) return;
 
         socket.on("receive-message", (message) => {
-            console.log("📩 Tin nhắn nhận từ server:", message); // Debug
             setMessages((prev) => [...prev, message]); // ✅ Hiển thị tin nhắn mới
         });
 
         return () => socket.off("receive-message");
     }, [socket]);
-
+/*
     // 📌 Lấy tin nhắn cũ từ server khi chat với một user khác
     useEffect(() => {
         axios.get(`http://localhost:5000/api/message/${userId}/${partnerId}`).then((res) => {
             setMessages(res.data);
         });
     }, [userId, partnerId]);
-
+*/
     return (
         <div>
             <h2>Chat</h2>

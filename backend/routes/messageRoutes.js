@@ -1,9 +1,9 @@
 const express = require("express");
+const authMiddleware = require('../middleware/authMiddleware');
 const { getMessages } = require("../controllers/messageController");
 
 const router = express.Router();
 
-//router.post("/send", sendMessage); // API gửi tin nhắn
-router.get("/:user1/:user2", getMessages); // API lấy lịch sử chat
+router.get('/:userId', authMiddleware, getMessages); // API lấy lịch sử chat
 
 module.exports = router;

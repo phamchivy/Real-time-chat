@@ -1,46 +1,36 @@
-import { useState } from "react";
 import { SocketProvider } from "./context/SocketContext";
-import Chat from "./components/Chat";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import HomePage from "./pages/HomePage";
+import Register from "./pages/Register"; // hoặc ./components/Register
+import ProfilePage from "./pages/ProfilePage"; // Import ProfilePage
+import EditProfile from "./pages/EditProfile"; // Import trang chỉnh sửa
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import ChatPage from "./pages/ChatPage";
 
-function App() {
-    const [userId, setUserId] = useState("");
-    const [partnerId, setPartnerId] = useState("");
-    const [chatStarted, setChatStarted] = useState(false); // Trạng thái để bắt đầu chat
-
-    const handleStartChat = () => {
-        if (userId && partnerId) {
-            setChatStarted(true); // Khi nhập đủ, hiển thị Chat component
-        } else {
-            alert("Vui lòng nhập đầy đủ User ID và Partner ID!");
-        }
-    };
-
-    return (
-        <SocketProvider>
-            {!chatStarted ? (
-                <div style={{ padding: "20px", textAlign: "center" }}>
-                    <h1>Chat App</h1>
-                    <input
-                        type="text"
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
-                        placeholder="Nhập ID của bạn"
-                    />
-                    <br />
-                    <input
-                        type="text"
-                        value={partnerId}
-                        onChange={(e) => setPartnerId(e.target.value)}
-                        placeholder="Nhập ID của đối phương"
-                    />
-                    <br />
-                    <button onClick={handleStartChat}>Bắt đầu chat</button>
-                </div>
-            ) : (
-                <Chat userId={userId} partnerId={partnerId} />
-            )}
-        </SocketProvider>
-    );
-}
-
+const PrivateRoute = ({ children }) => {
+    const { token } = useAuth();
+    return token ? children : <Navigate to="/" />;
+};
+const App = () => (
+    <AuthProvider>
+        <Router>
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+                <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+                <Route path="/edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/chat" element={<PrivateRoute><SocketProvider><ChatPage /></SocketProvider></PrivateRoute>} />
+            </Routes>
+        </Router>
+    </AuthProvider>
+);
 export default App;
+

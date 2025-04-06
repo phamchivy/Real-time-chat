@@ -71,7 +71,7 @@ const getUserProfile = async (req, res) => {
 // Cập nhật thông tin người dùng
 const updateUserProfile = async (req, res) => {
     const userId = req.user.id; // Lấy userId từ middleware xác thực
-    const { username, email, password } = req.body;
+    const { username, email } = req.body;
 
     try {
         const user = await User.findById(userId);
@@ -82,12 +82,6 @@ const updateUserProfile = async (req, res) => {
         // Cập nhật thông tin nếu có
         if (username) user.username = username;
         if (email) user.email = email;
-
-        if (password) {
-            // Mã hóa mật khẩu mới nếu có thay đổi
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password, salt);
-        }
 
         // Lưu thay đổi
         await user.save();
@@ -134,7 +128,7 @@ const forgotPassword = async (req, res) => {
         await user.save();
 
         // 📩 Gửi email chứa reset token (hoặc link reset)
-        const resetLink = `http://localhost:5000/api/users/reset-password/${resetToken}`;
+        const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
         try {
             await transporter.sendMail({
                 to: user.email,
@@ -189,6 +183,16 @@ const resetPassword = async (req, res) => {
     }
 };
 
+// GET /api/users — lấy tất cả user
+const getAllUsers = async (req, res)  => {
+    try {
+        const users = await User.find().select("-password"); // loại bỏ trường password
+        res.json(users);
+    } catch (err) {
+        console.error("Lỗi khi lấy danh sách user:", err);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+};
 
 module.exports = {
     registerUser,
@@ -197,4 +201,5 @@ module.exports = {
     updateUserProfile,
     forgotPassword,
     resetPassword,
+    getAllUsers,
 };
